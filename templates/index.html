@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Database</title>
+    <link href="{{url_for('static',filename='css/bootstrap.min.css')}}" rel="stylesheet">
+    <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/235/235359.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+.gradient-background {
+  background: linear-gradient(300deg, #00bfff, #e6a9e6, #ffb6c1); /* Blue, lavender, and soft pink */
+  background-size: 180% 180%;
+  animation: gradient-animation 18s ease infinite;
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.icons {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.icons li {
+  margin: 0 15px;
+}
+
+.icons a {
+  color: white;
+  text-decoration: none;
+}
+
+.icons a:hover {
+  color: #0073b1;
+}
+
+.header-title {
+  color: white !important;
+  text-align: center;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+.add-student-btn {
+  background-color: #1e90ff; /* Dodger Blue */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-student-btn:hover {
+  background-color: #4682b4; /* Steel Blue on hover */
+}
+
+
+
+    </style>
+</head>
+<body>
+{% block body %}
+<div class="container">
+<div class="well gradient-background text-white">
+
+    <h1 class="header-title">Flask-based CRUD Application <br> with MySQL Database in Python</h1>
+</div>
+
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Student List <button type="button" class="btn add-student-btn pull-right" data-toggle="modal" data-target="#mymodal">Add Student Data</button></h2>
+
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                {% for message in messages %}
+
+                <div class="alert alert-success alert-dismissable text-center" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                        <span aria-hidden="true"></span>
+                    </button>
+                    {{message}}
+                </div>
+
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+            </div>
+        </div>
+
+        <table class="table table-stripped">
+            <tr>
+                <th>Number</th>
+                <th>Name</th>
+                <th>Student ID</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Gender (Optional)</th>
+                <th>Manage</th>
+            </tr>
+
+            {% for student in students %}
+            <tr>
+                <td>{{student.id}}</td>
+                <td>{{student.name}}</td>
+                <td>{{student.student_id}}</td>
+                <td>{{student.email}}</td>
+                <td>{{student.phone}}</td>
+                <td>{{student.gender}}</td>
+                <td> <a href="/update/{{student.id}}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{ student.id }}">Update</a>
+                <form action="{{ url_for('delete', id=student.id) }}" method="POST" style="display:inline;">
+    <input type="hidden" name="_method" value="DELETE">
+    <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('Warning: This action cannot be undone! Proceed?')">
+        Delete
+    </button>
+</form></td>
+            </tr>
+            {% endfor %}
+
+        </table>
+                <div class="text-right mt-3">
+    <a href="{{ url_for('logout') }}" class="btn btn-danger ">Logout</a>
+</div>
+    </div>
+
+
+    <!--INSERT DATA-->
+    <div id="mymodal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Insert Information</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="{{url_for('post')}}" method="POST">
+                        <div class ="form-group">
+                            <label>Name:</label>
+                            <input type="text" class="form-control" name="name" required="1">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Student ID</label>
+                            <input type="text" class="form-control" name="student_id" required="1">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="text" class="form-control" name="email" required="1">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone:</label>
+                            <input type="text" class="form-control" name="phone" required="1">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Gender (Optional):</label>
+                            <input type="text" class="form-control" name="gender">
+                        </div>
+
+                        <div class="form-group">
+                            <button class="btn btn-primary" type="submit">Insert Data</button>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <!--UPDATE DATA-->
+    {% for student in students %}
+    <div id="modaledit{{ student.id }}" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Update Information</h4>
+                </div>
+                <div class="modal-body">
+                    <form action="{{url_for('update', id=student.id)}}" method="POST">
+
+                        <input type="hidden" name="_method" value="PUT">
+
+                        <div class ="form-group">
+                            <label>Name:</label>
+                            <input type="text" class="form-control" name="name" value="{{student.name}}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Student ID</label>
+                            <input type="text" class="form-control" name="student_id" value="{{student.student_id}}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="text" class="form-control" name="email" value="{{student.email}}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone:</label>
+                            <input type="text" class="form-control" name="phone" value="{{student.phone}}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Gender (Optional):</label>
+                            <input type="text" class="form-control" name="gender" value="{{student.gender}}">
+                        </div>
+
+                        <div class="form-group">
+                            <button class="btn btn-primary" type="submit">Update Data</button>
+                        </div>
+
+
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+{% endblock %}
+
+    <div class="well gradient-background text-white">
+
+
+    <ul class="icons">
+        <li>
+            <a href="https://www.linkedin.com/in/allan-jr-balanga-268305285/" class="fab fa-linkedin fa-2x"></a>
+        </li>
+        <li>
+            <a href="https://www.facebook.com/Am.Balanga03" class="fab fa-facebook-f fa-2x"></a>
+        </li>
+        <li>
+            <a href="https://github.com/AllanMBalanga" class="fab fa-github fa-2x"></a>
+        </li>
+    </ul>
+    </div>
+</div>
+
+</body>
+
+<script type="text/javascript" src="{{url_for('static', filename='js/jquery-3.2.1.min.js')}}"></script>
+<script type="text/javascript" src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
+</html>
